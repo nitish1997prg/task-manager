@@ -31,4 +31,6 @@ jobs:
         run: npm ci
 
       - name: Run Jest and Supertest tests
+        env: 
+            JWT_SECRET: ${{secrets.JWT_SECRET}}
         run: npm test
