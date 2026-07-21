@@ -22,8 +22,8 @@ beforeAll(async ()=>{
 });
 
 afterAll(async ()=>{
-    await mongod.stop();
     await mongoose.disconnect();
+    await mongod.stop();
 });
 
 test('end to end test from registration to crud tasks',async ()=>{
