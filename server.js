@@ -4,7 +4,7 @@ import connectDb from "./config/db.js";
 
 const MONGO_URI = process.env.MONGO_URI;
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 async function startServer(){
     try{
