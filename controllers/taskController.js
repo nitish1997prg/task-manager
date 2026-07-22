@@ -49,8 +49,15 @@ export async function getAllTasks(req,res) {
         const offset = Number(req?.query?.offset) || 0;
         const limit = Number(req?.query?.limit) || 10;
         const userId = req.user.userId;
+        const completed = req?.query?.completed;
+
+        const filter = {userId: userId};
+
+        if(completed !== undefined){
+            filter.completed = completed === "true";
+        }
         
-        const tasks = await Task.find({userId: userId}).skip(offset).limit(limit);
+        const tasks = await Task.find(filter).skip(offset).limit(limit);
 
         return res.status(200).json(tasks);
 
