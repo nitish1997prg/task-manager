@@ -86,7 +86,7 @@ http://localhost:3000/docs
 ### Production
 
 ```
-https://<your-cloud-run-url>/docs
+https://task-manager-501138420037.asia-south1.run.app/docs
 ```
 
 ---
