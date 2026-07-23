@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import Task from "../models/Task.js";
+import AppError from "../utils/AppError.js";
 
 export async function createTask(req,res) {
-    try {
 
-        const userId = req.user.userId;
+        const {userId} = req.user;
 
         const {title, description} = req.body;
         
@@ -20,20 +20,11 @@ export async function createTask(req,res) {
             insertedId: insertedTask._id,
             message: 'Task inserted successfully'
         });
-
-    }catch(error){
-        console.error(`Error creating a task! ${error}`);
-
-        return res.status(500).json({
-            message:'An internal server error occurred while creating a task!'
-        });
-    }
 }
 
 export async function getAllTasks(req,res) {
-    try {
 
-        const userId = req.user.userId;
+        const {userId} = req.user;
 
         const {offset, limit, completed } = req.query;
 
@@ -47,45 +38,29 @@ export async function getAllTasks(req,res) {
 
         return res.status(200).json(tasks);
 
-    }catch(error){
-        console.error(`Error fetching all tasks ${error}`);
-
-        return res.status(500).json({
-            message:'An internal server error occurred while fetching all tasks'
-        });
-    }
 }
 
 
 export async function getTask(req,res){
-    try {
-
+    
         const {id} = req.params;
         const userId = req.user.userId;
 
         const task = await Task.findOne({_id: id, userId: userId});
 
         if(!task){
-            return res.status(404).json({
-                message: 'Task not found'
-            })
+            throw new AppError(404, "Task not found!");
         }
 
         return res.status(200).json(task);
 
-    }catch(error){
-        console.error(`Error fetching task by id: ${error}`);
-
-        return res.status(500).json({
-            message: 'An internal server error occurred while fetching task'
-        });
-    }
+    
 }
 
 export async function updateTask(req,res){
-    try {
+
         const taskId = req.params.id;
-        const userId = req.user.userId;
+        const {userId} = req.user;
 
         const {title,description,completed} = req.body;
 
@@ -103,25 +78,14 @@ export async function updateTask(req,res){
         });
 
         if(!updatedTask){
-            return res.status(404).json({
-                message:'Task not found!'
-            });
+            throw new AppError(404,"Task not found!");
         }
 
         return res.status(200).json(updatedTask);
-
-
-    }catch(error){
-        console.error(`Error updating task : ${error}`);
-
-        return res.status(500).json({
-            message: 'An internal server error occurred while updating task'
-        });
-    }
 }
 
 export async function deleteTask(req,res){
-    try{
+
         const {id} = req.params;
         const userId = req.user.userId;
 
@@ -133,20 +97,12 @@ export async function deleteTask(req,res){
         );
 
         if(!deletedTask){
-            return res.status(404).json({
-                message: 'Task not found!'
-            });
+            throw new AppError(404,"Task not found!");
         }
 
         return res.status(200).json({
             message: 'Task Deleted successfully!'
         });
 
-    }catch(error){
-        console.error(`Error deleting the task! ${error} `);
-
-        return res.status(500).json({
-            message:'An internal server error occurred while deleting the task!'
-        });
-    }
+    
 }

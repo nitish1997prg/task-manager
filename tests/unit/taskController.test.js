@@ -87,13 +87,9 @@ describe('createTask',()=>{
 
         Task.create.mockRejectedValue(new Error("Database error"));
 
-        await createTask(req,res);
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({
-            message:"An internal server error occurred while creating a task!"
-        });
-
+        await expect(createTask(req,res)).rejects.toMatchObject({
+            message: "Database error"
+        })
 
     });
 
@@ -170,15 +166,12 @@ describe('getAllTasks',()=>{
             })
         });
         
-
-        await getAllTasks(req,res);
+        await expect(getAllTasks(req,res)).rejects.toMatchObject({
+            message: "Database error!"
+        });
 
         expect(Task.find).toHaveBeenCalledTimes(1);
         
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'An internal server error occurred while fetching all tasks'
-        });
 
 
     });
@@ -244,15 +237,15 @@ describe('getTask',()=>{
 
         Task.findOne.mockResolvedValue(null);
 
-        await getTask(req,res);
+        await expect(getTask(req,res)).rejects.toMatchObject({
+            statusCode: 404,
+            message: "Task not found!"
+        });
 
         expect(Task.findOne).toHaveBeenCalledTimes(1);
         expect(Task.findOne).toHaveBeenCalledWith({_id: id, userId: "669b76d6c3f3a8b4c5e712a9"});
 
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'Task not found'
-        });
+        
     });
 
 });
@@ -327,7 +320,10 @@ describe('updateTask',()=>{
 
         Task.findOneAndUpdate.mockResolvedValue(null);
 
-        await updateTask(req,res);
+        await expect(updateTask(req,res)).rejects.toMatchObject({
+            statusCode: 404,
+            message: "Task not found!"
+        });
 
         expect(Task.findOneAndUpdate).toHaveBeenCalledTimes(1);
         expect(Task.findOneAndUpdate).toHaveBeenCalledWith(
@@ -335,11 +331,6 @@ describe('updateTask',()=>{
             {returnDocument: 'after',
             runValidators: true}
         );
-
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'Task not found!'
-        });
     })
 
 
@@ -401,15 +392,13 @@ describe('deleteTask',()=>{
 
         Task.findOneAndDelete.mockResolvedValue(null);
 
-        await deleteTask(req,res);
+        await expect(deleteTask(req,res)).rejects.toMatchObject({
+            statusCode: 404,
+            message: "Task not found!"
+        });
 
         expect(Task.findOneAndDelete).toHaveBeenCalledTimes(1);
         expect(Task.findOneAndDelete).toHaveBeenCalledWith({_id: id, userId: "669b76d6c3f3a8b4c5e712a9"});
-
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'Task not found!'
-        })
     });
 });
 

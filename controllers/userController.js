@@ -1,19 +1,17 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import AppError from "../utils/AppError.js";
 
 
 export async function registerUser(req,res) {
-    try {
         
         const {name, email, password} = req.body;
 
         const userExists = await User.findOne({email: email});
 
         if(userExists){
-            return res.status(409).json({
-                message:`A user with email address ${email} already exists!`
-            });
+            throw new AppError(409,`A user with email address ${email} already exists!`);
         }
 
         const hashedPassword = await bcrypt.hash(password,10);
@@ -30,36 +28,23 @@ export async function registerUser(req,res) {
            message: 'User registered successfully!',
            insertedUserId: user._id 
         });
-
-    }catch(error){
-        
-        console.error(`Error registering user! ${error}`);
-        return res.status(500).json({
-            message:'An internal server error occurred while registering user!'
-        });
-
-    }
 }
 
 export async function loginUser(req,res){
-    try{
+
         const {email, password} = req.body;
 
         const userExists = await User.findOne({email: email});
 
         if(!userExists){
-            return res.status(401).json({
-                message:'Invalid credentials! Please try with correct details'
-            });
+            throw new AppError(401,"Invalid credentials! Please try with correct details");
         }
 
 
         const isPasswordCorrect = await bcrypt.compare(password,userExists.password);
 
         if(!isPasswordCorrect){
-            return res.status(401).json({
-                message:'Invalid credentials! Please try with correct details'
-            });
+            throw new AppError(401,"Invalid credentials! Please try with correct details");
         }
 
 
@@ -73,14 +58,4 @@ export async function loginUser(req,res){
             message:'Login successful!',
             token,
         });
-
-
-    }catch(error){
-        
-        console.error(`Error logging in user! ${error}`);
-
-        return res.status(500).json({
-            message:'An internal server error occurred while logging in user!'
-        })
-    }
 }

@@ -98,17 +98,15 @@ describe('registerUser',()=>{
             password: "Herz"
         });
 
-        await registerUser(req,res);
+        await expect(registerUser(req,res)).rejects.toMatchObject({
+            statusCode: 409,
+            message: `A user with email address ${req.body.email} already exists!`
+        });
 
         expect(User.findOne).toHaveBeenCalledTimes(1);
         expect(User.findOne).toHaveBeenCalledWith({email: req.body.email});
 
         expect(User.create).toHaveBeenCalledTimes(0);
-
-        expect(res.status).toHaveBeenCalledWith(409);
-        expect(res.json).toHaveBeenCalledWith({
-             message:`A user with email address ${req.body.email} already exists!`
-        });
     });
 
     test('database throws error 500',async ()=>{
@@ -128,17 +126,14 @@ describe('registerUser',()=>{
 
         User.findOne.mockRejectedValue(new Error("Database error!"));
 
-        await registerUser(req,res);
+        await expect(registerUser(req,res)).rejects.toMatchObject({
+            message: "Database error!"
+        });
 
         expect(User.findOne).toHaveBeenCalledTimes(1);
         expect(User.findOne).toHaveBeenCalledWith({email: req.body.email});
 
         expect(User.create).toHaveBeenCalledTimes(0);
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'An internal server error occurred while registering user!'
-        });
 
 
     });
@@ -203,17 +198,16 @@ describe('loginUser',()=>{
 
         User.findOne.mockResolvedValue(null);
 
-        await loginUser(req,res);
+        await expect(loginUser(req,res)).rejects.toMatchObject({
+            statusCode: 401,
+            message: "Invalid credentials! Please try with correct details"
+        });
 
         expect(User.findOne).toHaveBeenCalledTimes(1);
         expect(User.findOne).toHaveBeenCalledWith({email: req.body.email});
 
         expect(jwt.sign).toHaveBeenCalledTimes(0);
-        
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-             message:'Invalid credentials! Please try with correct details'
-        });
+    
 
 
     });
@@ -238,7 +232,10 @@ describe('loginUser',()=>{
 
         bcrypt.compare.mockResolvedValue(false);
 
-        await loginUser(req,res);
+        await expect(loginUser(req,res)).rejects.toMatchObject({
+            statusCode: 401,
+            message: "Invalid credentials! Please try with correct details"
+        });
 
         expect(User.findOne).toHaveBeenCalledTimes(1);
         expect(User.findOne).toHaveBeenCalledWith({email: req.body.email});
@@ -247,11 +244,6 @@ describe('loginUser',()=>{
         expect(bcrypt.compare).toHaveBeenCalledWith(req.body.password,"Herz");
 
         expect(jwt.sign).toHaveBeenCalledTimes(0);
-
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'Invalid credentials! Please try with correct details'
-        });
 
     });
 });
