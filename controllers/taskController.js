@@ -4,27 +4,14 @@ import Task from "../models/Task.js";
 export async function createTask(req,res) {
     try {
 
-        const body = req.body;
         const userId = req.user.userId;
 
-        if(!body){
-            return res.status(400).json({
-                message:'Request body not present!'
-            });
-        }
-
-        const title = body.title || '';
+        const {title, description} = req.body;
         
-        if(title === '') {
-            return res.status(400).json({
-                message:'Title is required!'
-            });
-        }
-
         const insertedTask = await Task.create({
-            userId: userId,
-            title: title,
-            ...(body.description && {description: body.description})
+            userId,
+            title,
+            description,
         });
 
         console.log(`Task inserted successfully with id: ${insertedTask._id}`);
@@ -46,15 +33,14 @@ export async function createTask(req,res) {
 export async function getAllTasks(req,res) {
     try {
 
-        const offset = Number(req?.query?.offset) || 0;
-        const limit = Number(req?.query?.limit) || 10;
         const userId = req.user.userId;
-        const completed = req?.query?.completed;
+
+        const {offset, limit, completed } = req.query;
 
         const filter = {userId: userId};
 
         if(completed !== undefined){
-            filter.completed = completed === "true";
+            filter.completed = completed;
         }
         
         const tasks = await Task.find(filter).skip(offset).limit(limit);
@@ -74,21 +60,8 @@ export async function getAllTasks(req,res) {
 export async function getTask(req,res){
     try {
 
-        const id = req.params.id;
+        const {id} = req.params;
         const userId = req.user.userId;
-
-        if(!id) {
-            return res.status(400).json({
-                message:'Task id not passed in path params!'
-            });
-        }
-
-        if(!mongoose.Types.ObjectId.isValid(id)){
-            return res.status(400).json({
-                message:'Task id is not a valid object id'
-            });
-        }
-
 
         const task = await Task.findOne({_id: id, userId: userId});
 
@@ -114,36 +87,12 @@ export async function updateTask(req,res){
         const taskId = req.params.id;
         const userId = req.user.userId;
 
-        if(!taskId){
-            return res.status(400).json({
-                message: 'Task id not passed in path params'
-            });
-        }
-
-        if(!mongoose.Types.ObjectId.isValid(taskId)){
-            return res.status(400).json({
-                message:'Task id provided is not a valid ObjectId'
-            });
-        }
-
-        if(!req.body){
-            return res.status(400).json({
-                message:'Request body is missing!'
-            });
-        }
-
         const {title,description,completed} = req.body;
 
         const updateData = {};
         if(title !== undefined) updateData.title = title;
         if(description !== undefined) updateData.description = description;
         if(completed !== undefined) updateData.completed = completed;
-
-        if(Object.keys(updateData).length === 0){
-            return res.status(400).json({
-                message: 'Please provide atleast one field to update'
-            });
-        }
 
         const updatedTask = await Task.findOneAndUpdate({
             _id: taskId,
@@ -173,20 +122,8 @@ export async function updateTask(req,res){
 
 export async function deleteTask(req,res){
     try{
-        const id = req.params.id;
+        const {id} = req.params;
         const userId = req.user.userId;
-
-        if(!id){
-            return res.status(400).json({
-                message: 'Task id not present in the path params'
-            });
-        }
-
-        if(!mongoose.Types.ObjectId.isValid(id)){
-            return res.status(400).json({
-                message:'Task id provided is not a valid Object ID'
-            });
-        }
 
         const deletedTask = await Task.findOneAndDelete(
             {

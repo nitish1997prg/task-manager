@@ -5,13 +5,8 @@ import jwt from "jsonwebtoken";
 
 export async function registerUser(req,res) {
     try {
+        
         const {name, email, password} = req.body;
-
-        if(!name || !email || !password){
-            return res.status(400).json({
-                message:'Request body missing required fields - name,email,password'
-            });
-        }
 
         const userExists = await User.findOne({email: email});
 
@@ -24,8 +19,8 @@ export async function registerUser(req,res) {
         const hashedPassword = await bcrypt.hash(password,10);
 
         const user = await User.create({
-            name: name,
-            email: email,
+            name,
+            email,
             password: hashedPassword
         });
 
@@ -49,12 +44,6 @@ export async function registerUser(req,res) {
 export async function loginUser(req,res){
     try{
         const {email, password} = req.body;
-
-        if(!email || !password){
-            return res.status(400).json({
-                message:'Email and Password are required!'
-            });
-        }
 
         const userExists = await User.findOne({email: email});
 
@@ -82,7 +71,7 @@ export async function loginUser(req,res){
 
         return res.status(200).json({
             message:'Login successful!',
-            token: token
+            token,
         });
 
 
