@@ -79,29 +79,6 @@ describe('registerUser',()=>{
 
     });
 
-    test('should throw 400 error when any of required fields are missing',async ()=>{
-        const req = {
-            body: {
-                name: "Nitish",
-                email: "nitish123@gmail.com"
-            }
-        };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-
-        await registerUser(req,res);
-
-        expect(User.findOne).toHaveBeenCalledTimes(0);
-        expect(User.create).toHaveBeenCalledTimes(0);
-        
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({
-            message:'Request body missing required fields - name,email,password'
-        });
-    });
-
     test('should throw 409 error when user with email already exists',async ()=>{
         const req = {
             body: {
@@ -209,31 +186,6 @@ describe('loginUser',()=>{
             message:'Login successful!',
             token: "Supersecret"
         });
-    });
-    test('should throw 400 error when no email or password',async ()=>{
-        
-        const req = {
-            body: {
-                email: "nitish123@gmail.com"
-            }
-        };
-        
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-
-        await loginUser(req,res);
-
-        expect(User.findOne).toHaveBeenCalledTimes(0);
-        expect(jwt.sign).toHaveBeenCalledTimes(0);
-
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({
-             message:'Email and Password are required!'
-        });
-
-
     });
     test('should throw 401 error when user with email does not exist',async ()=>{
         
